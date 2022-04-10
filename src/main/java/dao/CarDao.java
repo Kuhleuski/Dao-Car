@@ -5,8 +5,12 @@ import exception.DaoException;
 import util.ConnectionManager;
 
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class CarDao {
@@ -38,17 +42,46 @@ public class CarDao {
             WHERE id = ?
             """;
 
+    private static final String FIND_ALL_SQL = """
+            SELECT id,
+             carname,
+             color,
+             price
+            FROM car
+            """;
+
+
     private CarDao() {
     }
+// вывод всех записей из таблицы
+    public List<Car> FindAll(){
+        try (var connection = ConnectionManager.open();
+        var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
+            var resultSet = prepareStatement.executeQuery();
+            List<Car> cars = new ArrayList<>();
+            Car car = null;
+            while (resultSet.next()){
+                car = new Car(resultSet.getInt("id"),
+                        resultSet.getString("carname"),
+                        resultSet.getString("color"),
+                        resultSet.getInt("price"));
+                cars.add(car);
+            }
+            return cars;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
 
+    
     //Тут он сказал что можно ломбоом заменить все кэтч блоки надо посмотреть
     // так же этот метод работает в связке с нижним методом !!! ВАЖНО
     public Optional<Car> findById(Integer id) {
         try (var connection = ConnectionManager.open();
-             var preparedStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
+             var prepareStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            prepareStatement.setInt(1, id);
 
-            var resultSet = preparedStatement.executeQuery();
+            var resultSet = prepareStatement.executeQuery();
             Car car = null;
             if (resultSet.next()) {
                 car = new Car(
@@ -68,13 +101,13 @@ public class CarDao {
     // метод который сверху используется для этого метода в связке
     public void update(Car car) {
         try (var connection = ConnectionManager.open();
-             var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
-            preparedStatement.setString(1, car.getCarname());
-            preparedStatement.setString(2, car.getColor());
-            preparedStatement.setInt(3, car.getPrice());
-            preparedStatement.setInt(4, car.getId());
+             var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
+            prepareStatement.setString(1, car.getCarname());
+            prepareStatement.setString(2, car.getColor());
+            prepareStatement.setInt(3, car.getPrice());
+            prepareStatement.setInt(4, car.getId());
 
-            preparedStatement.executeUpdate();
+            prepareStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DaoException(e);
         }
@@ -83,14 +116,14 @@ public class CarDao {
     // вставить в таблицу новый объект
     public Car save(Car car) {
         try (var connection = ConnectionManager.open();
-             var preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, car.getCarname());
-            preparedStatement.setString(2, car.getColor());
-            preparedStatement.setInt(3, car.getPrice());
+             var prepareStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            prepareStatement.setString(1, car.getCarname());
+            prepareStatement.setString(2, car.getColor());
+            prepareStatement.setInt(3, car.getPrice());
 
-            preparedStatement.executeUpdate();
+            prepareStatement.executeUpdate();
 
-            var generatedKeys = preparedStatement.getGeneratedKeys();
+            var generatedKeys = prepareStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 car.setId(generatedKeys.getInt(1)); // тут проблема была, не принимает название колонки
             }
@@ -103,10 +136,10 @@ public class CarDao {
     // удалить из таблицы запись по id
     public boolean delete(Integer id) {
         try (var connection = ConnectionManager.open();
-             var preparedStatement = connection.prepareStatement(DELETE_SQL)) {
-            preparedStatement.setInt(1, id);
+             var prepareStatement = connection.prepareStatement(DELETE_SQL)) {
+            prepareStatement.setInt(1, id);
 
-            return preparedStatement.executeUpdate() > 0;
+            return prepareStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new DaoException(e);
         }
