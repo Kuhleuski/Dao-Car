@@ -2,12 +2,23 @@ package dao;
 
 import entity.Car;
 
+import java.util.List;
+
 public class DaoRunner {
     public static void main(String[] args) {
 
         //saveTest();
         //deleteTest();
+        //updateTest();
 
+        var carDao = CarDao.getInstance();
+        var cars = carDao.FindAll();
+        System.out.println(cars);
+
+
+    }
+
+    private static void updateTest() {
         var carDao = CarDao.getInstance();
         var maybeCar = carDao.findById(2);
         System.out.println(maybeCar);
@@ -16,8 +27,6 @@ public class DaoRunner {
             car.setPrice(11244);
             carDao.update(car);
         });
-
-
     }
 
     private static void deleteTest() {
