@@ -2,7 +2,6 @@ package dao;
 
 import entity.Car;
 
-import java.util.List;
 
 public class DaoRunner {
     public static void main(String[] args) {

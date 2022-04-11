@@ -1,12 +1,11 @@
 package dao;
 
+
+
+
 import entity.Car;
 import exception.DaoException;
 import util.ConnectionManager;
-
-
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -73,7 +72,7 @@ public class CarDao {
         }
     }
 
-    
+
     //Тут он сказал что можно ломбоом заменить все кэтч блоки надо посмотреть
     // так же этот метод работает в связке с нижним методом !!! ВАЖНО
     public Optional<Car> findById(Integer id) {
